@@ -58,7 +58,7 @@ try {
     mongoose.connect(config.mongo.uri);
     logger.info(`[DATABASE]: Connected with mongodb ${process.env.NODE_ENV} database.`)
 } catch (err) {
-    throw new Error('[ERROR]: Error connecting to database.')
+    throw new Error('[ERROR]: Error connecting to 1 database.')
 }
 
 export default app;
