@@ -1,0 +1,15 @@
+# tests
+/__tests__
+/.vscode
+/node_modules
+/coverage
+/jest.config.js
+/dist
+.dockerignore
+.gitignore
+.gitlab-ci.yml
+.gitpod.yml
+CONTRIBUTING.md 
+Dockerfile
+jenkinsfile
+README.md
