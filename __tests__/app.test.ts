@@ -6,14 +6,7 @@ import { config } from "../src/config/config";
 
 
 /* Connecting to the test database before each test. */
-beforeAll(async () => {
-    await mongoose.connect(config.mongo.uri);
-});
 
-/* Closing the test database connection after each test. */
-afterAll(async () => {
-    await mongoose.connection.close();
-});
 
 describe("App health endpoint", () => {
     test("Test server status", async () => {
