@@ -50,12 +50,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Register the error handling middleware function
 app.use(errorHandler);
 
-if (!config.mongo.uri) {
-    throw new Error('[ERROR]: Mongo URI must be defined.');
-}
+// if (!config.mongo.uri) {
+//     throw new Error('[ERROR]: Mongo URI must be defined.');
+// }
 
 try {
-    mongoose.connect(config.mongo.uri);
+    let connStr = process.env.AZURE_COSMOS_CONNECTIONSTRING || 'N/A';
+    mongoose.connect(connStr);
     logger.info(`[DATABASE]: Connected with mongodb ${process.env.NODE_ENV} database.`)
 } catch (err) {
     throw new Error('[ERROR]: Error connecting to 1 database.')
