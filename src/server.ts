@@ -6,5 +6,5 @@ import logger from './library/logger';
 const PORT = config.server.port;
 
 app.listen(PORT, () => {
-    logger.info(`[SERVER]: Server is running in ${process.env.NODE_ENV} mode at http://localhost:${PORT}`);
+    logger.info(`[SERVER]: Server 1 is running in ${process.env.NODE_ENV} mode at http://localhost:${PORT}`);
 });
