@@ -64,10 +64,10 @@ app.use(errorHandler);
 try {
 
     // ------------ Uncomment for production -----------//
-    // mongoose.connect(config.mongoUri.prod);
+    mongoose.connect(config.mongoUri.prod);
 
     // ------------ Uncomment for development -----------//
-    mongoose.connect(config.mongoUri.dev);
+    // mongoose.connect(config.mongoUri.dev);
     logger.info(`[DATABASE]: Connected with mongodb database.`)
 } catch (err) {
     throw new Error('[ERROR]: Error connecting to database.')
