@@ -4,16 +4,11 @@ export interface JwtPayload {
 }
 
 export interface Config {
-    mongo: {
-        uri: string;
-    },
-    server: {
-        port: number;
-    },
-    jwt: {
-        key: string;
-    },
-    modelApi: {
-        api: string;
-    }
+    mongoUri: {
+        dev: string;
+        prod: string;
+    };
+    serverPort: number;
+    jwtKey: string;
+    modelApi: string;
 }

@@ -10,6 +10,10 @@ export class DistrictRepository {
         const district = new this.districtModel(createDistrictDto);
         return district.save();
     }
+
+    async getAllDistrict() {
+        return this.districtModel.find({});
+    }
 }
 
 

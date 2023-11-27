@@ -1,10 +1,6 @@
 import app from './app';
-import { config } from './config/config';
-import logger from './library/logger';
+import { config } from './common/config';
 
-
-const PORT = config.server.port;
-
-app.listen(PORT, () => {
-    logger.info(`[SERVER]: Server 100 is running in ${process.env.NODE_ENV} mode at http://localhost:${PORT}`);
+app.listen(config.serverPort, () => {
+    console.log(`⚡️[server]: Server is running at http://localhost:${config.serverPort}`);
 });

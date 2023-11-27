@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { userService } from "../services/user.service";
 import { CustomError } from "../common/errors/custom-error";
-import logger from "../library/logger";
+import logger from "../common/logger";
 
 
 class AuthController {

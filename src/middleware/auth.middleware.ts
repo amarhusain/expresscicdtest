@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import logger from "../library/logger";
+import logger from "../common/logger";
 import { authService } from "../services/auth.service";
-import { config } from "../config/config";
 import { JwtPayload } from "jsonwebtoken";
 
 export interface CustomRequest extends Request {
@@ -10,7 +9,7 @@ export interface CustomRequest extends Request {
 
 class AuthMiddleware {
 
-    static JWT_KEY = config.jwt.key;
+    static JWT_KEY = process.env.JWT_KEY;
 
     async validateSigninRequestBodyFields(req: Request, res: Response, next: NextFunction) {
         if (req.body && req.body.emailOrUsername && req.body.password) {
@@ -38,10 +37,16 @@ class AuthMiddleware {
                 logger.error('Auth token not found');
                 res.status(401).send({ error: 'Auth token not found' })
             } else {
+                if (AuthMiddleware.JWT_KEY) {
+                    const decoded = await authService.verifyJwt(token, AuthMiddleware.JWT_KEY);
+                    // (req as CustomRequest).token = decoded;
+                    next();
 
-                const decoded = await authService.verifyJwt(token, AuthMiddleware.JWT_KEY);
-                // (req as CustomRequest).token = decoded;
-                next();
+                } else {
+                    logger.error('JWT key not found');
+                    res.status(401).send({ error: 'JWT key not found' })
+                }
+
             }
         } catch (error: any) {
             if (error.name === 'TokenExpiredError') {

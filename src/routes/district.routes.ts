@@ -3,8 +3,8 @@ import { districtController } from "../controllers/district.controller";
 
 const districtRouter = Router();
 
-districtRouter.post('/create-district', districtController.createDistrict);
-// districtRouter.get('/getstate/:id', StateController.getStateById);
+districtRouter.post('/create', districtController.createDistrict);
+districtRouter.get('/', districtController.allDistrict);
 
 export default districtRouter;
 
