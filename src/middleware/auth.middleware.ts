@@ -2,14 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import logger from "../common/logger";
 import { authService } from "../services/auth.service";
 import { JwtPayload } from "jsonwebtoken";
+import { config } from "../common/config";
 
 export interface CustomRequest extends Request {
     token: string | JwtPayload;
 }
 
 class AuthMiddleware {
-
-    static JWT_KEY = process.env.JWT_KEY;
 
     async validateSigninRequestBodyFields(req: Request, res: Response, next: NextFunction) {
         if (req.body && req.body.emailOrUsername && req.body.password) {
@@ -21,7 +20,7 @@ class AuthMiddleware {
     }
 
     async validateSignupRequestBodyFields(req: Request, res: Response, next: NextFunction) {
-        if (req.body && req.body.email && req.body.username && req.body.password) {
+        if (req.body && req.body.email && req.body.name && req.body.mobile && req.body.password) {
             next();
         } else {
             logger.error('While calling API "' + req.originalUrl + '" missing required field');
@@ -37,9 +36,10 @@ class AuthMiddleware {
                 logger.error('Auth token not found');
                 res.status(401).send({ error: 'Auth token not found' })
             } else {
-                if (AuthMiddleware.JWT_KEY) {
-                    const decoded = await authService.verifyJwt(token, AuthMiddleware.JWT_KEY);
+                if (config.jwtKey) {
+                    const decoded = await authService.verifyJwt(token, config.jwtKey);
                     // (req as CustomRequest).token = decoded;
+                    req.body.payload = decoded;
                     next();
 
                 } else {

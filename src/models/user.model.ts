@@ -2,18 +2,24 @@ import mongoose from "mongoose";
 import { authService } from "../services/auth.service";
 
 export interface IUserDocument extends mongoose.Document {
+    name: string;
     email: string;
+    mobile: string;
     password: string;
-    username: string;
+    isPasswordChanged: boolean;
+    role: string;
 }
 
 export interface IUserModel extends mongoose.Model<IUserDocument> { }
 
 const UserSchema: mongoose.Schema<IUserDocument> = new mongoose.Schema(
     {
+        name: { type: String, required: true },
         email: { type: String, trim: true, required: true, unique: true },
+        mobile: { type: String, unique: true },
         password: { type: String, required: true },
-        username: { type: String, trim: true, required: true, unique: true }
+        isPasswordChanged: { type: Boolean, required: true },
+        role: { type: String, required: true },
     },
     {
         toJSON: {
@@ -33,6 +39,6 @@ UserSchema.pre('save', async function (done) {
     done();
 })
 
-const UserModel = mongoose.model<IUserDocument>('User', UserSchema);
+const User = mongoose.model<IUserDocument>('User', UserSchema);
 
-export default UserModel;
+export default User;

@@ -1,15 +1,16 @@
 import * as bodyparser from 'body-parser';
 import cors from 'cors';
-import stateRouter from './routes/state.routes';
-import districtRouter from './routes/district.routes';
-import authRouter from './routes/auth.routes';
-import mongoose from 'mongoose';
 import { JwtPayload } from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import logger from './common/logger';
+import authRouter from './routes/auth.routes';
+import districtRouter from './routes/district.routes';
+import stateRouter from './routes/state.routes';
 
 import express, { NextFunction, Request, Response } from 'express';
-import { config } from './common/config';
 import path from 'path';
+import { config } from './common/config';
+import appointmentRouter from './routes/appointment.routes';
 
 
 
@@ -36,6 +37,7 @@ function errorHandler(err: Error, req: Request, res: Response, next: NextFunctio
 app.use('/api', authRouter);
 app.use('/api', stateRouter);
 app.use('/api/district', districtRouter);
+app.use('/api/appointment', appointmentRouter);
 
 
 app.get('/health', (req: Request, res: Response) => {
@@ -45,11 +47,11 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Serve static files from the 'public' directory
-// app.use(express.static(path.join(__dirname, '../out')));
+app.use(express.static(path.join(__dirname, '../build')));
 
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../out/index.html'));
-// })
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../build/index.html'));
+})
 
 // Handling non matching request from client
 app.use((req: Request, res: Response, next: NextFunction) => {

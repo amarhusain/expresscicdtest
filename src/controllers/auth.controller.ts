@@ -1,13 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { userService } from "../services/user.service";
 import { CustomError } from "../common/errors/custom-error";
+import { USER_TYPE } from "../utils/constants";
 import logger from "../common/logger";
 
 
 class AuthController {
 
     async signup(req: Request, res: Response, next: NextFunction) {
-        const result = await userService.createUser(req.body);
+        const { email, name, mobile, password } = req.body;
+        const result = await userService.createUser({ name, email, mobile, password, isPasswordChanged: false, role: USER_TYPE.PATIENT });
         if (result instanceof CustomError || result instanceof Error) {
             next(result);
         } else {

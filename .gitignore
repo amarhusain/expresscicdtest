@@ -1,6 +1,4 @@
 
-# Debug config files
-/.vscode
 
 # Test code Coverage
 /coverage

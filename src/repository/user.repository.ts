@@ -1,3 +1,4 @@
+import { CreateUserDto } from "../dto/user.dto";
 import UserModel, { IUserDocument, IUserModel } from "../models/user.model";
 
 // save to db
@@ -7,19 +8,27 @@ export class UserRepository {
 
     }
 
-    async saveUser(user: IUserDocument) {
-        const userModel = await this.userModel.create(user);
+    async saveUser(user: CreateUserDto) {
+        const userModel = new this.userModel(user);
         // const userModel = await new this.userModel(user);
-        return userModel.save();
+        return await userModel.save();
+    }
+
+    async findById(userId: string) {
+        return await this.userModel.findById({ _id: userId });
     }
 
     async findOneByEmail(email: string) {
         return await this.userModel.findOne({ email });
     }
 
-    async findOneByUsername(username: string) {
-        return await this.userModel.findOne({ username });
+    async findOneByMobile(mobile: string) {
+        return await this.userModel.findOne({ mobile });
     }
+
+    // async findOneByUsername(name: string) {
+    //     return await this.userModel.findOne({ name });
+    // }
 
 }
 
