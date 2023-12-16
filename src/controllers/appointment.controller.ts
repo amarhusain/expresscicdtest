@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import { config } from "../common/config";
 import { CustomError } from "../common/errors/custom-error";
 import logger from "../common/logger";
-import { config } from "../common/config";
-import { authService } from "../services/auth.service";
 import { appointmentService } from "../services/appointment.service";
+import { authService } from "../services/auth.service";
 
 
 class AppointmentController {
@@ -85,6 +85,18 @@ class AppointmentController {
 
     async getAppointmentSlot(req: Request, res: Response, next: NextFunction) {
         const result = await appointmentService.getAppointmentSlot()
+        if (result instanceof CustomError || result instanceof Error) {
+            next(result);
+        } else {
+
+            res.status(200).send(result);
+            logger.info('API url "' + req.originalUrl + '" handled successfully!');
+        }
+    }
+
+    async getAppointmentList(req: Request, res: Response, next: NextFunction) {
+        const { payload } = req.body;
+        const result = await appointmentService.getAppointmentByDoctorId(payload.userId);
         if (result instanceof CustomError || result instanceof Error) {
             next(result);
         } else {

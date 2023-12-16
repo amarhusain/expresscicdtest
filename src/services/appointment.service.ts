@@ -1,4 +1,3 @@
-import { config } from "../common/config";
 import { BadRequestError } from "../common/errors/bad-request-error";
 import { JwtPayload } from "../common/global";
 import { BookAppointmentDto, PatientDetailDto } from "../dto/user.dto";
@@ -278,6 +277,21 @@ export class AppointmentService {
         }
 
 
+    }
+
+    async getAppointmentByDoctorId(doctorId: string) {
+
+        let appointmentList: any[] = [];
+
+        const appointments = await this.appointmentRepository.getAppointmentByDoctorId(doctorId);
+        if (!appointments) return new BadRequestError("Couldn't get the appointment");
+
+        for (let k = 0; k < appointments.length; k++) {
+            // console.log('--------------------')
+            const appointment = { date: appointments[k].date, doctor: appointments[k].doctorId, patient: appointments[k].userId };
+            appointmentList.push(appointment);
+        }
+        return appointmentList;
     }
 }
 

@@ -10,5 +10,6 @@ export interface Config {
     };
     serverPort: number;
     jwtKey: string;
+    jwtExpiresIn: string;
     modelApi: string;
 }

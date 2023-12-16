@@ -30,7 +30,7 @@ export class UserService {
         if (!newUser) return new BadRequestError("Couldn't register the user");
 
         if (!UserService.JWT_KEY) return new BadRequestError("JWT key not found");
-        const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser.id }, UserService.JWT_KEY);
+        const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser.id }, UserService.JWT_KEY, config.jwtExpiresIn);
 
         return { token, id: newUser._id, name: newUser.name, email: newUser.email, mobile: newUser.mobile, role: newUser.role };
 
@@ -48,9 +48,13 @@ export class UserService {
         if (!samePwd) return new NotAuthorizedError(`Email and password are incorrect.`);
 
         if (!UserService.JWT_KEY) return new BadRequestError("JWT key not found");
-        const token = await this.authService.generateJwt({ email: userFound.email, userId: userFound.id }, UserService.JWT_KEY);
+        const token = await this.authService.generateJwt({ email: userFound.email, userId: userFound.id }, UserService.JWT_KEY, config.jwtExpiresIn);
 
         return { token, id: userFound._id, name: userFound.name, email: userFound.email, mobile: userFound.mobile, role: userFound.role };
+    }
+
+    async findUserById(userId: string) {
+        return await this.userRepository.findById(userId);
     }
 
 

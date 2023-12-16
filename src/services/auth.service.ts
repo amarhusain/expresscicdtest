@@ -1,15 +1,15 @@
-import jwt from "jsonwebtoken";
-import { JwtPayload } from "../common/global";
 import { randomBytes, scrypt } from "crypto";
+import jwt from "jsonwebtoken";
 import { promisify } from "util";
+import { JwtPayload } from "../common/global";
 
 const scryptAsync = promisify(scrypt);
 
 export class AuthService {
 
-    async generateJwt(payload: JwtPayload, JWT_KEY: string) {
+    async generateJwt(payload: JwtPayload, JWT_KEY: string, expiresIn: string) {
         return jwt.sign(payload, JWT_KEY, {
-            expiresIn: '60000',
+            expiresIn: expiresIn,
         });
     }
 

@@ -16,6 +16,14 @@ export class AppointmentRepository {
         date.setHours(0, 0, 0);
         return this.appointmentModel.find({ date: { $gte: date } });
     }
+
+    async getAppointmentByDoctorId(doctorId: string) {
+        let date = new Date();
+        date.setHours(0, 0, 0);
+        return this.appointmentModel.find({ doctorId, date: { $gte: date } })
+            .populate({ path: 'doctorId', select: 'name' })
+            .populate({ path: 'userId', select: 'name email mobile role' });
+    }
 }
 
 

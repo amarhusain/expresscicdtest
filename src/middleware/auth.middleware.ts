@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import logger from "../common/logger";
-import { authService } from "../services/auth.service";
 import { JwtPayload } from "jsonwebtoken";
 import { config } from "../common/config";
+import logger from "../common/logger";
+import { authService } from "../services/auth.service";
+import { userService } from "../services/user.service";
+import { USER_TYPE } from "../utils/constants";
 
 export interface CustomRequest extends Request {
     token: string | JwtPayload;
@@ -34,7 +36,7 @@ class AuthMiddleware {
 
             if (!token) {
                 logger.error('Auth token not found');
-                res.status(401).send({ error: 'Auth token not found' })
+                res.status(401).send({ error: 'Auth token not found' });
             } else {
                 if (config.jwtKey) {
                     const decoded = await authService.verifyJwt(token, config.jwtKey);
@@ -44,7 +46,7 @@ class AuthMiddleware {
 
                 } else {
                     logger.error('JWT key not found');
-                    res.status(401).send({ error: 'JWT key not found' })
+                    res.status(401).send({ error: 'JWT key not found' });
                 }
 
             }
@@ -60,6 +62,27 @@ class AuthMiddleware {
                 res.status(401).send({ error: `[${error.name}] : ${error.message}` });
             }
 
+        }
+    }
+
+    async checkUserRoleIsDoctor(req: Request, res: Response, next: NextFunction) {
+        const { payload } = req.body;
+        if (payload) {
+            const result = await userService.findUserById(payload.userId);
+            if (result) {
+                if (result.role === USER_TYPE.DOCTOR) {
+                    next();
+                } else {
+                    logger.error('Unauthorised access');
+                    res.status(401).send({ error: 'Unauthorised access' })
+                }
+            } else {
+                logger.error('Unauthorised access');
+                res.status(401).send({ error: 'Unauthorised access' });
+            }
+        } else {
+            logger.error('Unauthorised access');
+            res.status(401).send({ error: 'Unauthorised access' });
         }
     }
 
