@@ -1,16 +1,14 @@
 import * as bodyparser from 'body-parser';
 import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import logger from './common/logger';
-import authRouter from './routes/auth.routes';
-import districtRouter from './routes/district.routes';
-import stateRouter from './routes/state.routes';
-
-import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import { config } from './common/config';
+import { CustomError } from './common/errors/custom-error';
+import logger from './common/logger';
 import appointmentRouter from './routes/appointment.routes';
+import authRouter from './routes/auth.routes';
 
 
 
@@ -29,14 +27,25 @@ app.use(bodyparser.json());
 app.use(cors());
 
 // Define the error handling middleware function
-function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+// function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+//     logger.error(err.stack);
+//     res.status(500).send(err.name + ' : ' + err.message);
+// }
+
+// Error handling middleware
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
     logger.error(err.stack);
-    res.status(500).send(err.name + ' : ' + err.message);
-}
+
+    // Check for specific error types and send an appropriate response
+    if (err instanceof CustomError) {
+        return res.status(err.statusCode).json({ error: err.message });
+    }
+
+    // For other types of errors, send a generic error response
+    res.status(500).json({ error: 'Internal Server Error' });
+};
 
 app.use('/api', authRouter);
-app.use('/api', stateRouter);
-app.use('/api/district', districtRouter);
 app.use('/api/appointment', appointmentRouter);
 
 

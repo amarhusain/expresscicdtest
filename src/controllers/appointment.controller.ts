@@ -52,57 +52,65 @@ class AppointmentController {
 
             }
         } catch (error: any) {
-            res.status(500).send("Couldn't book appointment");
-            logger.info('API url "' + req.originalUrl + '" handled successfully!');
+            next(error);
         }
 
 
 
     }
 
-    async addPatientDetail(req: Request, res: Response, next: NextFunction) {
-        const { userId, gender, age, occupation,
-            address, presentComplain, pastMedicalHistory, familySevereDisease,
-            familySevereDiseaseSide, familySevereDiseaseMember,
-            familySevereDiseaseDetail, smoking, alcoholic,
-            drugAddict, payload } = req.body;
+    // async addPatientDetail(req: Request, res: Response, next: NextFunction) {
+    //     const { userId, gender, age, occupation,
+    //         address, presentComplain, pastMedicalHistory, familySevereDisease,
+    //         familySevereDiseaseSide, familySevereDiseaseMember,
+    //         familySevereDiseaseDetail, smoking, alcoholic,
+    //         drugAddict, payload } = req.body;
+    //     try {
+    //         const result = await appointmentService.addPatientDetail({
+    //             userId, gender, age, occupation,
+    //             address, presentComplain, pastMedicalHistory, familySevereDisease,
+    //             familySevereDiseaseSide, familySevereDiseaseMember,
+    //             familySevereDiseaseDetail, smoking, alcoholic,
+    //             drugAddict
+    //         }, payload);
+    //         if (result instanceof CustomError || result instanceof Error) {
+    //             next(result);
+    //         } else {
 
-        const result = await appointmentService.addPatientDetail({
-            userId, gender, age, occupation,
-            address, presentComplain, pastMedicalHistory, familySevereDisease,
-            familySevereDiseaseSide, familySevereDiseaseMember,
-            familySevereDiseaseDetail, smoking, alcoholic,
-            drugAddict
-        }, payload);
-        if (result instanceof CustomError || result instanceof Error) {
-            next(result);
-        } else {
-
-            res.status(200).send(result);
-            logger.info('API url "' + req.originalUrl + '" handled successfully!');
-        }
-    }
+    //             res.status(200).send(result);
+    //             logger.info('API url "' + req.originalUrl + '" handled successfully!');
+    //         }
+    //     } catch (error) {
+    //         next(error);
+    //     }
+    // }
 
     async getAppointmentSlot(req: Request, res: Response, next: NextFunction) {
-        const result = await appointmentService.getAppointmentSlot()
-        if (result instanceof CustomError || result instanceof Error) {
-            next(result);
-        } else {
-
-            res.status(200).send(result);
-            logger.info('API url "' + req.originalUrl + '" handled successfully!');
+        try {
+            const result = await appointmentService.getAppointmentSlot()
+            if (result instanceof CustomError || result instanceof Error) {
+                next(result);
+            } else {
+                res.status(200).send(result);
+                logger.info('API url "' + req.originalUrl + '" handled successfully!');
+            }
+        } catch (error) {
+            next(error);
         }
     }
 
     async getAppointmentList(req: Request, res: Response, next: NextFunction) {
         const { payload } = req.body;
-        const result = await appointmentService.getAppointmentByDoctorId(payload.userId);
-        if (result instanceof CustomError || result instanceof Error) {
-            next(result);
-        } else {
-
-            res.status(200).send(result);
-            logger.info('API url "' + req.originalUrl + '" handled successfully!');
+        try {
+            const result = await appointmentService.getAppointmentByDoctorId(payload.userId);
+            if (result instanceof CustomError || result instanceof Error) {
+                next(result);
+            } else {
+                res.status(200).send(result);
+                logger.info('API url "' + req.originalUrl + '" handled successfully!');
+            }
+        } catch (error) {
+            next(error);
         }
     }
 

@@ -1,6 +1,6 @@
-import { BadRequestError } from "../common/errors/bad-request-error";
-import { JwtPayload } from "../common/global";
-import { BookAppointmentDto, PatientDetailDto } from "../dto/user.dto";
+import { InternalServerError } from "../common/errors/internal-server-error";
+import { RecordNotFoundError } from "../common/errors/record-not-found-error";
+import { BookAppointmentDto } from "../dto/user.dto";
 import { AppointmentRepository, appointmentRepository } from "../repository/appointment.repository";
 import { PatientRepository, patientRepository } from "../repository/patient.repository";
 import { UserRepository, userRepository } from "../repository/user.repository";
@@ -22,18 +22,18 @@ export class AppointmentService {
         const existingUser = await this.userRepository.findOneByEmail(bookAppointmentDto.email);
         if (existingUser) {
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: "656daa8ec19d5e392c6d3985", userId: existingUser._id });
-            if (!result) return new BadRequestError("Couldn't book the appointment" + result);
+            if (!result) return new InternalServerError("Internal server error, appointmentService-line24");
             return result;
         } else {
             // Create patient account
             const newUser = await this.createPatientAccount(bookAppointmentDto)
-            if (!newUser) return new BadRequestError("Couldn't create the patient");
+            if (!newUser) return new InternalServerError("Internal server error, appointmentService-line29");
             // Save patient detail
             const patient = await this.savePatientDetail(newUser._id, bookAppointmentDto)
-            if (!patient) return new BadRequestError("Couldn't create the patient detail");
+            if (!patient) return new InternalServerError("Internal server error, appointmentService-line32");
             // Book appointment for User
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: "656daa8ec19d5e392c6d3985", userId: newUser._id });
-            if (!result) return new BadRequestError("Couldn't book the appointment");
+            if (!result) return new InternalServerError("Internal server error, appointmentService-line35");
             return result;
         }
     }
@@ -68,10 +68,11 @@ export class AppointmentService {
         });
     }
 
+    // TODO need to complete
     async bookAppointment(userId: string) {
 
         const existingUser = await this.userRepository.findById(userId);
-        if (!existingUser) return new BadRequestError('User not found!');
+        if (!existingUser) return new RecordNotFoundError('User not found!');
 
         // const usernameTaken = await this.userRepository.findOneByUsername(user.username);
         // if (usernameTaken) return new BadRequestError('Username is already taken!');
@@ -88,16 +89,16 @@ export class AppointmentService {
     }
 
 
-    async addPatientDetail(patientDetailDto: PatientDetailDto, payload: JwtPayload) {
+    // async addPatientDetail(patientDetailDto: PatientDetailDto, payload: JwtPayload) {
 
-        const user = await this.userRepository.findById(payload.userId);
-        if (!user) return new BadRequestError("User not found");
-        patientDetailDto.userId = user._id;
-        const patientDetail = await this.patientRepository.addPatientDetail(patientDetailDto)
-        if (!patientDetail) return new BadRequestError("Couldn't add patient detail");
+    //     const user = await this.userRepository.findById(payload.userId);
+    //     if (!user) return new BadRequestError("User not found");
+    //     patientDetailDto.userId = user._id;
+    //     const patientDetail = await this.patientRepository.addPatientDetail(patientDetailDto)
+    //     if (!patientDetail) return new BadRequestError("Couldn't add patient detail");
 
-        return patientDetail;
-    }
+    //     return patientDetail;
+    // }
 
     async getAppointmentSlot() {
 
@@ -107,6 +108,8 @@ export class AppointmentService {
         let dateArr: Date[] = [];
 
         const bookedSlot = await this.appointmentRepository.getAllAppointment();
+        if (!bookedSlot) return new InternalServerError("Internal server error, appointmentService-line110");
+
         for (let k = 0; k < bookedSlot.length; k++) {
             // console.log('--------------------')
             console.log(bookedSlot[k].date.toLocaleString());
@@ -192,12 +195,6 @@ export class AppointmentService {
     private isDateAvailable(date: Date, hour: number, bookedSlot: any, slot: any): void {
         let dateMatched = false;
         for (let k = 0; k < bookedSlot.length; k++) {
-            // console.log('--------------------')
-            // console.log(bookedSlot[k].date.toLocaleString())
-            // console.log("passed -  dt" + date.getDate() + "  hr" + (hour))
-            // console.log("date - " + date.getDate() + "  " + (date.getHours() + 1))
-            // console.log("booked -  dt" + bookedSlot[k].date.getDate() + "  hr" + (bookedSlot[k].date.getHours()))
-            // console.log('--------------------')
             if (date.getDate() === bookedSlot[k].date.getDate()) {
                 if (hour === bookedSlot[k].date.getHours()) {
                     dateMatched = true;
@@ -284,10 +281,9 @@ export class AppointmentService {
         let appointmentList: any[] = [];
 
         const appointments = await this.appointmentRepository.getAppointmentByDoctorId(doctorId);
-        if (!appointments) return new BadRequestError("Couldn't get the appointment");
+        if (!appointments) return new InternalServerError("Internal server error, appointmentService-line283");
 
         for (let k = 0; k < appointments.length; k++) {
-            // console.log('--------------------')
             const appointment = { date: appointments[k].date, doctor: appointments[k].doctorId, patient: appointments[k].userId };
             appointmentList.push(appointment);
         }
