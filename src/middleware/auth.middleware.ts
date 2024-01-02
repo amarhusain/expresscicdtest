@@ -86,6 +86,33 @@ class AuthMiddleware {
         }
     }
 
+    async validateSendPasswordResetMailRequestBodyFields(req: Request, res: Response, next: NextFunction) {
+        if (req.body && req.body.email) {
+            next();
+        } else {
+            logger.error('While calling API "' + req.originalUrl + '" missing required field');
+            res.status(400).send({ error: 'missing required field' })
+        }
+    }
+
+    async validateResetPasswordRequestBodyFields(req: Request, res: Response, next: NextFunction) {
+        if (req.body && req.body.passowrd && req.body.cnfrmPassword && req.body.token) {
+            if (req.body.passowrd === req.body.cnfrmPassword) {
+                next();
+            } else {
+                logger.error('While calling API "' + req.originalUrl + '" missing required field');
+                res.status(400).send({ error: 'Passwords must match' })
+            }
+        } else if (!req.body.token) {
+            logger.error('While calling API "' + req.originalUrl + '" missing token');
+            res.status(400).send({ error: 'Password reset link has expired!' })
+        } else {
+            logger.error('While calling API "' + req.originalUrl + '" missing required field');
+            res.status(400).send({ error: 'missing required field' })
+        }
+    }
+
+
 }
 
 export default new AuthMiddleware;

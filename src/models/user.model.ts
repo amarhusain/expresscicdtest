@@ -6,8 +6,8 @@ export interface IUserDocument extends mongoose.Document {
     email: string;
     mobile: string;
     password: string;
-    isPasswordChanged: boolean;
     role: string;
+    resetNonce: boolean;
 }
 
 export interface IUserModel extends mongoose.Model<IUserDocument> { }
@@ -18,8 +18,8 @@ const UserSchema: mongoose.Schema<IUserDocument> = new mongoose.Schema(
         email: { type: String, trim: true, required: true, unique: true },
         mobile: { type: String, unique: true },
         password: { type: String, required: true },
-        isPasswordChanged: { type: Boolean, required: true },
         role: { type: String, required: true },
+        resetNonce: { type: Boolean, required: true },
     },
     {
         toJSON: {

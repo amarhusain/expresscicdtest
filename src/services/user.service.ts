@@ -1,14 +1,21 @@
 import { config } from "../common/config";
 import { ConflictError } from "../common/errors/conflict-error";
+import { InternalServerError } from '../common/errors/internal-server-error';
 import { NotAuthorizedError } from "../common/errors/not-authorized-error";
+import { RecordNotFoundError } from "../common/errors/record-not-found-error";
 import { AuthUserDto, CreateUserDto } from "../dto/user.dto";
+import { ResetPwdTokenRepository, resetPwdTokenRepository } from '../repository/resetpwd.token.repository';
 import { UserRepository, userRepository } from "../repository/user.repository";
 import { AuthService, authService } from "./auth.service";
+import { EmailService, emailService } from './email.service';
 
 // Business Logic
 export class UserService {
 
-    constructor(private userRepository: UserRepository, private authService: AuthService) {
+    constructor(private userRepository: UserRepository,
+        private authService: AuthService,
+        private resetPwdTokenRepository: ResetPwdTokenRepository,
+        private emailService: EmailService) {
 
     }
 
@@ -47,12 +54,82 @@ export class UserService {
         return { token, id: userFound._id, name: userFound.name, email: userFound.email, mobile: userFound.mobile, role: userFound.role };
     }
 
+
+    async sendPasswordResetMailRequest(email: string) {
+        const user = await this.userRepository.findOneByEmail(email);
+        if (!user) return new RecordNotFoundError('User not found, userService-line58');
+
+        // Generate a reset token
+        // const token = this.generateResetToken();
+        const expiresIn = Date.now() + 3600000; // Token expires in 1 hour (adjust as needed)
+        const token = await this.authService.generateJwt({ email, userId: user._id }, config.jwtKey, expiresIn.toString());
+        const recipientsAddress = [{ address: email }];
+        const senderAddress = "DoNotReply@shivamhomeocare.com";
+        const emailSent = await this.emailService.sendPasswordResetEmail(senderAddress, recipientsAddress, token);
+        if (!emailSent) return new RecordNotFoundError('Internal server error, userService-line68');
+
+        // Update the resetNonce status - used to check password reset link has been used or not
+        const updatedUser = await this.userRepository.updateResetNonceStatus(user._id, true);
+        if (!updatedUser) return new InternalServerError('Internal server error, userService-line67');
+
+
+        return { msg: "email sent successfully" };
+    }
+
+
+    async resetPassword(newPassword: string, token: string) {
+
+        try {
+            // Verify the token
+            const payload = await this.authService.verifyJwt(token, config.jwtKey);
+
+            // Check if the token has expired
+            if (Date.now() >= payload.exp * 1000) {
+                return new InternalServerError('Password reset link has expired');
+            }
+            // Find user by email (replace this with your database query)
+            const user = await this.userRepository.findOneByEmail(payload.email);
+            if (!user) return new RecordNotFoundError('User not found, userService-line87');
+
+            // Check if the token has used
+            if (!user.resetNonce) {
+                return new InternalServerError('Password reset link has expired');
+            }
+
+            // Hash the new password and update the user's password in the database
+            const hashedPassword = await this.authService.pwdToHash(newPassword);
+
+            // Update the user's new password
+            const result = await this.userRepository.updateUserPassword(user._id, hashedPassword);
+            if (!result) return new RecordNotFoundError('Internal server error, userService-line87');
+
+            // Update the resetNonce status - used to check password reset link has been used or not
+            const updatedUser = await this.userRepository.updateResetNonceStatus(user._id, false);
+            if (!updatedUser) return new InternalServerError('Internal server error, userService-line67');
+
+            return { message: 'Password reset successfully' };
+        } catch (error) {
+            return new InternalServerError('Invalid or expired token');
+        }
+    }
+
     async findUserById(userId: string) {
         return await this.userRepository.findById(userId);
     }
 
+    async findUserByEmail(email: string) {
+        const result = await this.userRepository.findOneByEmail(email);
+        if (!result) return new RecordNotFoundError('User not found!');
+        return result;
+    }
 
+
+    async getDoctorList() {
+        const doctorList = await this.userRepository.getAllDoctor();
+        if (!doctorList) return new InternalServerError("Internal server error, userService-line130");
+        return doctorList;
+    }
 
 }
 
-export const userService = new UserService(userRepository, authService);
+export const userService = new UserService(userRepository, authService, resetPwdTokenRepository, emailService);

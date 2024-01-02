@@ -1,6 +1,9 @@
+import { config } from "../common/config";
 import { InternalServerError } from "../common/errors/internal-server-error";
 import { RecordNotFoundError } from "../common/errors/record-not-found-error";
+import { JwtPayloadResponse } from "../common/global";
 import { BookAppointmentDto } from "../dto/user.dto";
+import { IPatient } from "../models/patient.model";
 import { AppointmentRepository, appointmentRepository } from "../repository/appointment.repository";
 import { PatientRepository, patientRepository } from "../repository/patient.repository";
 import { UserRepository, userRepository } from "../repository/user.repository";
@@ -21,7 +24,7 @@ export class AppointmentService {
 
         const existingUser = await this.userRepository.findOneByEmail(bookAppointmentDto.email);
         if (existingUser) {
-            const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: "656daa8ec19d5e392c6d3985", userId: existingUser._id });
+            const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: existingUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line24");
             return result;
         } else {
@@ -32,20 +35,21 @@ export class AppointmentService {
             const patient = await this.savePatientDetail(newUser._id, bookAppointmentDto)
             if (!patient) return new InternalServerError("Internal server error, appointmentService-line32");
             // Book appointment for User
-            const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: "656daa8ec19d5e392c6d3985", userId: newUser._id });
+            const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: newUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line35");
             return result;
         }
     }
 
     async createPatientAccount(bookAppointmentDto: BookAppointmentDto) {
+        const pwd = await this.authService.pwdToHash(this.generateRandom4DigitNumber().toString());
         return await this.userRepository.saveUser({
             name: bookAppointmentDto.name,
             email: bookAppointmentDto.email,
             mobile: bookAppointmentDto.mobile,
-            password: '1234',
-            isPasswordChanged: false,
-            role: USER_TYPE.PATIENT
+            password: pwd,
+            role: USER_TYPE.PATIENT,
+            resetNonce: false
         });
     }
 
@@ -100,7 +104,16 @@ export class AppointmentService {
     //     return patientDetail;
     // }
 
-    async getAppointmentSlot() {
+    async getAppointmentSlot(token: string | undefined) {
+        let payload: JwtPayloadResponse;
+        let userDetail: IPatient | null = null;
+        if (token) {
+            //check user is loggedin and token is valid
+            payload = await this.authService.verifyJwt(token, config.jwtKey);
+            if (payload) {
+                userDetail = await this.patientRepository.findPatientByUserId(payload.userId);
+            }
+        }
 
         const allSlot = [];
         let slot: SlotType[] = [];
@@ -110,10 +123,10 @@ export class AppointmentService {
         const bookedSlot = await this.appointmentRepository.getAllAppointment();
         if (!bookedSlot) return new InternalServerError("Internal server error, appointmentService-line110");
 
-        for (let k = 0; k < bookedSlot.length; k++) {
-            // console.log('--------------------')
-            console.log(bookedSlot[k].date.toLocaleString());
-        }
+        // for (let k = 0; k < bookedSlot.length; k++) {
+        //     // console.log('--------------------')
+        //     console.log(bookedSlot[k].date.toLocaleString());
+        // }
 
         for (let i = 0; i < 6; i++) {
             const nextDate = new Date();
@@ -167,7 +180,7 @@ export class AppointmentService {
 
         }
 
-        return { dateArr, allSlot }
+        return { dateArr, allSlot, userDetail };
     }
 
     private createSlot(rowIndex: number, slotList: any) {
@@ -288,6 +301,17 @@ export class AppointmentService {
             appointmentList.push(appointment);
         }
         return appointmentList;
+    }
+
+
+    private generateRandom4DigitNumber = (): number => {
+        const min = 1000; // Minimum 4-digit number (inclusive)
+        const max = 9999; // Maximum 4-digit number (inclusive)
+
+        // Generate a random number between min and max
+        const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+
+        return randomNum;
     }
 }
 

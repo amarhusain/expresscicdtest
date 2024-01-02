@@ -3,22 +3,26 @@ import { Config } from '../common/global';
 
 dotenv.config();
 
-const JWT_KEY = process.env.JWT_KEY || '';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '';
-const SERVER_PORT = process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 8080;
-const MODEL_API_URL = process.env.MODEL_API_URL || '';
+const { NODE_ENV, DEVELOPMENT_DOMAIN, PRODUCTION_DOMAIN, JWT_KEY, JWT_EXPIRES_IN, SERVER_PORT, MODEL_API_URL, MONGO_URI_DEVELOPMENT, DB_NAME_DEVELOPMENT, COMMUNICATION_SERVICES_CONNECTION_STRING, AZURE_COSMOS_CONNECTIONSTRING } = process.env;
 
-const PROD_MONGO_URI = process.env.AZURE_COSMOS_CONNECTIONSTRING || '';
+const jwtKey = JWT_KEY || '';
+const jwtExpiresIn = JWT_EXPIRES_IN || '';
+const serverPort = SERVER_PORT ? Number(SERVER_PORT) : 8080;
+const modelApiUrl = MODEL_API_URL || '';
+const emailConnStr = COMMUNICATION_SERVICES_CONNECTION_STRING || '';
 
-const DEV_MONGO_URI = process.env.MONGO_URI_DEVELOPMENT + "/" + process.env.DB_NAME_DEVELOPMENT;
+const PROD_MONGO_URI = AZURE_COSMOS_CONNECTIONSTRING || '';
+const DEV_MONGO_URI = MONGO_URI_DEVELOPMENT + "/" + DB_NAME_DEVELOPMENT;
+
+const mongoConnUri = NODE_ENV === 'development' ? DEV_MONGO_URI : PROD_MONGO_URI;
+const appDomain = NODE_ENV === 'development' ? DEVELOPMENT_DOMAIN : PRODUCTION_DOMAIN;
 
 export const config: Config = {
-    mongoUri: {
-        dev: DEV_MONGO_URI,
-        prod: PROD_MONGO_URI
-    },
-    serverPort: SERVER_PORT,
-    jwtKey: JWT_KEY,
-    jwtExpiresIn: JWT_EXPIRES_IN,
-    modelApi: MODEL_API_URL
+    mongoConnUri,
+    serverPort,
+    jwtKey,
+    jwtExpiresIn,
+    modelApiUrl,
+    emailConnStr,
+    appDomain
 }

@@ -1,7 +1,7 @@
 import { randomBytes, scrypt } from "crypto";
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
-import { JwtPayload } from "../common/global";
+import { JwtPayload, JwtPayloadResponse } from "../common/global";
 
 const scryptAsync = promisify(scrypt);
 
@@ -26,7 +26,7 @@ export class AuthService {
     }
 
     async verifyJwt(jwtToken: string, JWT_KEY: string) {
-        return jwt.verify(jwtToken, JWT_KEY) as JwtPayload;
+        return jwt.verify(jwtToken, JWT_KEY) as JwtPayloadResponse;
     }
 }
 

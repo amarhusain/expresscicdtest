@@ -71,17 +71,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Register the error handling middleware function
 app.use(errorHandler);
 
+const init = async () => {
+    try {
+        console.log(config.mongoConnUri);
 
-try {
+        // ------------ Uncomment for production -----------//
+        // mongoose.connect(config.mongoUri.prod);
 
-    // ------------ Uncomment for production -----------//
-    mongoose.connect(config.mongoUri.prod);
-
-    // ------------ Uncomment for development -----------//
-    // mongoose.connect(config.mongoUri.dev);
-    logger.info(`[DATABASE]: Connected with mongodb database.`)
-} catch (err) {
-    throw new Error('[ERROR]: Error connecting to database.')
+        // ------------ Uncomment for development -----------//
+        await mongoose.connect(config.mongoConnUri);
+        logger.info(`[DATABASE]: Connected with mongodb database.`)
+    } catch (err) {
+        throw new Error('[ERROR]: Error connecting to database.')
+    }
 }
-
+init();
 export default app;

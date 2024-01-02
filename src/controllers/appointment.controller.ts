@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { config } from "../common/config";
 import { CustomError } from "../common/errors/custom-error";
+import { NotAuthorizedError } from "../common/errors/not-authorized-error";
 import logger from "../common/logger";
 import { appointmentService } from "../services/appointment.service";
 import { authService } from "../services/auth.service";
@@ -12,7 +13,7 @@ class AppointmentController {
         const { name, email, mobile, gender, age, occupation, address, appointmentDate,
             presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
             familySevereDiseaseMember, familySevereDiseaseDetail, smoking, alcoholic,
-            drugAddict } = req.body;
+            drugAddict, doctorId } = req.body;
 
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -24,7 +25,7 @@ class AppointmentController {
                 const result = await appointmentService.createUserAndBookAppointment({
                     name, email, mobile, gender, age, occupation, address, appointmentDt, presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
                     familySevereDiseaseMember, familySevereDiseaseDetail, smoking, alcoholic,
-                    drugAddict
+                    drugAddict, doctorId
                 });
                 if (result instanceof CustomError || result instanceof Error) {
                     next(result);
@@ -33,7 +34,7 @@ class AppointmentController {
                     logger.info('API url "' + req.originalUrl + '" handled successfully!');
                 }
             } else {
-
+                //check user is loggedin and token is valid
                 const payload = await authService.verifyJwt(token, config.jwtKey);
 
                 if (payload) {
@@ -47,7 +48,7 @@ class AppointmentController {
                     }
                 } else {
                     logger.error('Auth token expire need to login');
-                    res.status(401).send({ error: 'Auth token expire need to login' })
+                    return new NotAuthorizedError('Auth token expire need to login again.');
                 }
 
             }
@@ -86,8 +87,11 @@ class AppointmentController {
     // }
 
     async getAppointmentSlot(req: Request, res: Response, next: NextFunction) {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+
         try {
-            const result = await appointmentService.getAppointmentSlot()
+
+            const result = await appointmentService.getAppointmentSlot(token);
             if (result instanceof CustomError || result instanceof Error) {
                 next(result);
             } else {

@@ -26,9 +26,29 @@ export class UserRepository {
         return await this.userModel.findOne({ mobile });
     }
 
-    // async findOneByUsername(name: string) {
-    //     return await this.userModel.findOne({ name });
-    // }
+    async savePwdResetTokenInDb(updatedUser: IUserDocument) {
+        return await this.userModel.findByIdAndUpdate(updatedUser._id, updatedUser, { new: true });
+    }
+
+    async updateUserPassword(userId: string, newPassword: string) {
+        return await this.userModel.findByIdAndUpdate(
+            userId,
+            { $set: { password: newPassword } },
+            { new: true }
+        );
+    }
+
+    async updateResetNonceStatus(userId: string, status: boolean) {
+        return await this.userModel.findByIdAndUpdate(
+            userId,
+            { $set: { resetNonce: status } },
+            { new: true }
+        );
+    }
+
+    async getAllDoctor() {
+        return await this.userModel.find({ role: 'DOCTOR' });
+    }
 
 }
 

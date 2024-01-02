@@ -11,6 +11,9 @@ export class PatientRepository {
         return patient.save();
     }
 
+    async findPatientByUserId(userId: string) {
+        return this.patientModel.findOne({ userId });
+    }
     async getAllPatient() {
         return this.patientModel.find({});
     }

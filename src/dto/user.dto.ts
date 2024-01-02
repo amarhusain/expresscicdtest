@@ -10,8 +10,8 @@ export interface CreateUserDto {
     email: string;
     mobile: string;
     password: string;
-    isPasswordChanged: boolean;
     role: string;
+    resetNonce: boolean;
 }
 
 export interface BookAppointmentDto {
@@ -32,6 +32,7 @@ export interface BookAppointmentDto {
     smoking: string;
     alcoholic: string;
     drugAddict: string;
+    doctorId: string;
 }
 
 export interface PatientDetailDto {
@@ -56,4 +57,10 @@ export interface CreateAppointmentDto {
     date: Date;
     doctorId: string;
     userId: string;
+}
+
+
+export interface CreateResetPwdTokenDto {
+    userId: string;
+    resetPwdToken: string;
 }
