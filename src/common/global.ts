@@ -15,7 +15,6 @@ export interface Config {
     serverPort: number;
     jwtKey: string;
     jwtExpiresIn: string;
-    modelApiUrl: string;
     emailConnStr: string;
     appDomain: string | undefined;
 }
