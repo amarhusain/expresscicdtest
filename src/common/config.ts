@@ -8,7 +8,7 @@ const { DEVELOPMENT_DOMAIN, PRODUCTION_DOMAIN, JWT_KEY, JWT_EXPIRES_IN, SERVER_P
 const jwtKey = JWT_KEY || 'E3229B4313A5EA2DBE7B229B4313A5EAEF954E31CE32EF954E31CE32DBE7B29B4313A5EA2EE3';
 const jwtExpiresIn = JWT_EXPIRES_IN || '24h';
 const serverPort = SERVER_PORT ? Number(SERVER_PORT) : 8080;
-const emailConnStr = COMMUNICATION_SERVICES_CONNECTION_STRING || '';
+const emailConnStr = COMMUNICATION_SERVICES_CONNECTION_STRING || 'endpoint=https://shivamemailservice.unitedstates.communication.azure.com/;accesskey=Y0hBI3lANJtMS9nr7WBVUig1e1hKDhupoQtD7CReF5VRaK27ghuVIFq+Lvou55xlnWOPKFp3bihHKjgqsyq2fg==';
 
 // ------------ Uncomment for production -----------//
 const mongoConnUri = AZURE_COSMOS_CONNECTIONSTRING || '';
