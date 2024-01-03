@@ -23,16 +23,20 @@ export class UserService {
         const existingMail = await userRepository.findOneByEmail(user.email);
         // Email already exists, return 409 Conflict status code
         if (existingMail) return new ConflictError('Email id already used');
-
+        console.log('existing email')
         const existingMobile = await userRepository.findOneByMobile(user.mobile);
         // Mobile already exists, return 409 Conflict status code
         if (existingMobile) return new ConflictError('Mobile number already used');
+        console.log('existing mobile')
 
         user.password = await this.authService.pwdToHash(user.password);
+        console.log('pwd hashed')
 
         const newUser = await this.userRepository.saveUser(user);
+        console.log('user saved')
 
         const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser.id }, config.jwtKey, config.jwtExpiresIn);
+        console.log('token genrated')
 
         return { token, id: newUser._id, name: newUser.name, email: newUser.email, mobile: newUser.mobile, role: newUser.role };
 
