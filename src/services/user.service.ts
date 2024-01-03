@@ -23,11 +23,11 @@ export class UserService {
         const existingMail = await userRepository.findOneByEmail(user.email);
         // Email already exists, return 409 Conflict status code
         if (existingMail) return new ConflictError('Email id already used');
-        console.log('existing email')
+        console.log('existing email', existingMail)
         const existingMobile = await userRepository.findOneByMobile(user.mobile);
         // Mobile already exists, return 409 Conflict status code
         if (existingMobile) return new ConflictError('Mobile number already used');
-        console.log('existing mobile')
+        console.log('existing mobile', existingMobile)
 
         user.password = await this.authService.pwdToHash(user.password);
         console.log('pwd hashed')
