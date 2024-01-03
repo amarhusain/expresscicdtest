@@ -33,6 +33,8 @@ export class UserService {
         console.log('pwd hashed')
 
         const newUser = await this.userRepository.saveUser(user);
+        if (!newUser) return new InternalServerError(`Internal server error, userService-line36: ${newUser}`);
+
         console.log('user saved')
 
         const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser.id }, config.jwtKey, config.jwtExpiresIn);
