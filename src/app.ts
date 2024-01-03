@@ -42,7 +42,7 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     }
 
     // For other types of errors, send a generic error response
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: `Internal Server Error : ${err}` });
 };
 
 app.use('/api', authRouter);
