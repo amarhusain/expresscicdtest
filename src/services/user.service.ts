@@ -37,7 +37,8 @@ export class UserService {
 
         console.log('user saved')
 
-        const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser.id }, config.jwtKey, config.jwtExpiresIn);
+        const token = await this.authService.generateJwt({ email: newUser.email, userId: newUser._id }, config.jwtKey, config.jwtExpiresIn);
+        if (!newUser) return new InternalServerError(`Internal server error, userService-line40: ${token}`);
         console.log('token genrated')
 
         return { token, id: newUser._id, name: newUser.name, email: newUser.email, mobile: newUser.mobile, role: newUser.role };
