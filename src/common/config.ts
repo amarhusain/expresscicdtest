@@ -12,7 +12,7 @@ const emailConnStr = COMMUNICATION_SERVICES_CONNECTION_STRING || 'endpoint=https
 
 // ------------ Uncomment for production -----------//
 const mongoConnUri = AZURE_COSMOS_CONNECTIONSTRING || '';
-const appDomain = PRODUCTION_DOMAIN;
+const appDomain = PRODUCTION_DOMAIN || 'https://shivamhomeocare.com';
 
 // ------------ Uncomment for development -----------//
 // const mongoConnUri = MONGO_URI_DEVELOPMENT + "/" + DB_NAME_DEVELOPMENT;

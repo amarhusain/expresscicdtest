@@ -1,22 +1,25 @@
 import { config } from "../common/config";
 import { InternalServerError } from "../common/errors/internal-server-error";
 import { RecordNotFoundError } from "../common/errors/record-not-found-error";
-import { JwtPayloadResponse } from "../common/global";
+import { JwtPayloadResponse, MailDto } from "../common/global";
+import logger from "../common/logger";
 import { BookAppointmentDto } from "../dto/user.dto";
 import { IPatient } from "../models/patient.model";
 import { AppointmentRepository, appointmentRepository } from "../repository/appointment.repository";
 import { PatientRepository, patientRepository } from "../repository/patient.repository";
 import { UserRepository, userRepository } from "../repository/user.repository";
-import { USER_TYPE } from "../utils/constants";
+import { USER_ROLE } from "../utils/constants";
 import { SlotType } from "../utils/slot.type";
 import { AuthService, authService } from "./auth.service";
+import { EmailService, emailService } from "./email.service";
 
 export class AppointmentService {
     constructor(
         private userRepository: UserRepository,
         private authService: AuthService,
         private patientRepository: PatientRepository,
-        private appointmentRepository: AppointmentRepository) {
+        private appointmentRepository: AppointmentRepository,
+        private emailService: EmailService) {
 
     }
 
@@ -26,6 +29,12 @@ export class AppointmentService {
         if (existingUser) {
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: existingUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line24");
+            const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: existingUser.email }], receipientName: existingUser.name }
+            try {
+                const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
+            } catch (err) {
+                logger.error('Email address seems incorrect!')
+            }
             return result;
         } else {
             // Create patient account
@@ -37,6 +46,12 @@ export class AppointmentService {
             // Book appointment for User
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: newUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line35");
+            const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: newUser.email }], receipientName: newUser.name }
+            try {
+                const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
+            } catch (err) {
+                logger.error('Email address seems incorrect!')
+            }
             return result;
         }
     }
@@ -48,7 +63,7 @@ export class AppointmentService {
             email: bookAppointmentDto.email,
             mobile: bookAppointmentDto.mobile,
             password: pwd,
-            role: USER_TYPE.PATIENT,
+            role: USER_ROLE.PATIENT,
             resetNonce: false
         });
     }
@@ -315,4 +330,4 @@ export class AppointmentService {
     }
 }
 
-export const appointmentService = new AppointmentService(userRepository, authService, patientRepository, appointmentRepository);
+export const appointmentService = new AppointmentService(userRepository, authService, patientRepository, appointmentRepository, emailService);

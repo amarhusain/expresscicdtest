@@ -1,14 +1,14 @@
 
 import { EmailClient, KnownEmailSendStatus } from "@azure/communication-email";
+import moment from "moment";
 import { config } from "../common/config";
 import { InternalServerError } from "../common/errors/internal-server-error";
-import { RecipientAddress } from "../common/global";
+import { MailDto, RecipientAddress } from "../common/global";
+import { CONTACT, months } from "../utils/constants";
 
 export class EmailService {
-    // EMAIL_USERNAME = 'your-email@example.com';
-    // EMAIL_PASSWORD = 'your-email-password';
-    // EMAIL_SERVICE = 'your-email-service';
 
+    connectionString = config.emailConnStr;
 
     constructor() {
 
@@ -16,7 +16,6 @@ export class EmailService {
 
     // Send a password reset email
     sendPasswordResetEmail = async (senderAddress: string, recipientsAddress: RecipientAddress[], token: string) => {
-        const connectionString = config.emailConnStr;
         // const senderAddress = "contact@shivamhomeocare.com"
         // const recipientAddress = email;
 
@@ -68,7 +67,92 @@ export class EmailService {
         // };
 
         try {
-            const client = new EmailClient(connectionString);
+            const client = new EmailClient(this.connectionString);
+
+            const poller = await client.beginSend(message);
+
+            if (!poller.getOperationState().isStarted) {
+                return new InternalServerError("Poller was not started.");
+            }
+
+            let timeElapsed = 0;
+            while (!poller.isDone()) {
+                poller.poll();
+                console.log("Email send polling in progress");
+
+                await new Promise(resolve => setTimeout(resolve, POLLER_WAIT_TIME * 1000));
+                timeElapsed += 10;
+
+                if (timeElapsed > 18 * POLLER_WAIT_TIME) {
+                    return new InternalServerError("Polling timed out.");
+                }
+            }
+
+            if (poller.getResult()?.status === KnownEmailSendStatus.Succeeded) {
+                console.log(`Successfully sent the email (operation id: ${poller.getResult()?.id})`);
+                return true;
+            }
+            else {
+                console.log(poller.getResult()?.error)
+                return new InternalServerError('poller.getResult()?.error');
+
+            }
+        }
+        catch (ex) {
+            console.error(ex);
+            return new InternalServerError('internal error');
+        }
+
+
+    };
+
+    // Send a password reset email
+    sendAppointmentConfirmationEmail = async (mailDto: MailDto, appointmentDate: Date) => {
+
+        // <a style="text-decoration: none;background-color: #E12454;color: white;padding: 12px 80px;border-radius: 20px;font-size: 16px;cursor: pointer;" href = "${url}" > Change my password < /a>
+
+        const POLLER_WAIT_TIME = 10
+
+        const message = {
+            senderAddress: mailDto.senderAddress,
+            recipients: {
+                to: mailDto.recipientsAddress,
+            },
+            content: {
+                subject: "Appointment Confirmation - Shivam Homeo Care",
+                plainText: "Appointment Confirmation",
+                html: `<html>
+                    <p> Dear ${mailDto.receipientName},</p>
+                    <p>We hope this email finds you well. We would like to confirm your upcoming appointment with Shivam Homeocare & Reasearch Center.</p>
+                    <br><br>
+                    <p>Appointment Details:</p>
+                    <p> - Date: ${appointmentDate.getDate() + " " + months[appointmentDate.getMonth()] + " " + appointmentDate.getFullYear()}</p>
+                    <p> - Time: ${moment(appointmentDate).format('LT')}</p>
+                    <p> - Location: ${CONTACT.ADDRESS} </p>
+                    <br><br>
+                    <p>
+                        If you have any specific requirements or need to reschedule, please let us know at least 24 hours in advance. We value your time and want to ensure that the appointment is convenient for you.
+                    </p>
+                    <br>
+                    <p>Should you have any questions or require further assistance, feel free to contact us at ${CONTACT.HOSPITAL_NUMBER}. </p>
+
+                    <p>Thank you for choosing Shivam Homeocare & Research Center. We look forward to meeting with you.</p> 
+
+                    <p>For help and support, visit the Shivam Homeocare Support Center at  <a href= "https://shivamhomeocare.com/contact"> https://shivamhomeocare.com </a></p>
+
+                    <p>Thank you for visiting Shivam Homeocare.</p>
+
+                    <p>Best regards, </p>
+                    <br> 
+                    <p>Dr. Arvind Srivastav</p>
+                    <p>Shivam Homeocare Team</p>
+                    <p>${CONTACT.PHONE_HOSPITAL_1}</p>
+                    <html>`
+            },
+        }
+
+        try {
+            const client = new EmailClient(this.connectionString);
 
             const poller = await client.beginSend(message);
 

@@ -22,3 +22,10 @@ export interface Config {
 export interface RecipientAddress {
     address: string;
 }
+
+export interface MailDto {
+    senderAddress: string;
+    senderName: string;
+    recipientsAddress: RecipientAddress[];
+    receipientName: string;
+}

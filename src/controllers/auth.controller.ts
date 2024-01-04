@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../common/errors/custom-error";
 import logger from "../common/logger";
 import { userService } from "../services/user.service";
-import { USER_TYPE } from "../utils/constants";
+import { USER_ROLE } from "../utils/constants";
 
 
 class AuthController {
@@ -10,7 +10,7 @@ class AuthController {
     async signup(req: Request, res: Response, next: NextFunction) {
         const { email, name, mobile, password } = req.body;
         try {
-            const result = await userService.createUser({ name, email, mobile, password, role: USER_TYPE.PATIENT, resetNonce: false });
+            const result = await userService.createUser({ name, email, mobile, password, role: USER_ROLE.PATIENT, resetNonce: false });
             if (result instanceof CustomError || result instanceof Error) {
                 next(result);
             } else {

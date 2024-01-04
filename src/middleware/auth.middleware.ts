@@ -4,7 +4,7 @@ import { config } from "../common/config";
 import logger from "../common/logger";
 import { authService } from "../services/auth.service";
 import { userService } from "../services/user.service";
-import { USER_TYPE } from "../utils/constants";
+import { USER_ROLE } from "../utils/constants";
 
 export interface CustomRequest extends Request {
     token: string | JwtPayload;
@@ -70,7 +70,7 @@ class AuthMiddleware {
         if (payload) {
             const result = await userService.findUserById(payload.userId);
             if (result) {
-                if (result.role === USER_TYPE.DOCTOR) {
+                if (result.role === USER_ROLE.DOCTOR) {
                     next();
                 } else {
                     logger.error('Unauthorised access');
