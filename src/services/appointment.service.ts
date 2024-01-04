@@ -24,8 +24,11 @@ export class AppointmentService {
     }
 
     async createUserAndBookAppointment(bookAppointmentDto: BookAppointmentDto) {
+        console.log('book appointment start');
 
         const existingUser = await this.userRepository.findOneByEmail(bookAppointmentDto.email);
+        console.log('book appointment existing user', existingUser);
+
         if (existingUser) {
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: existingUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line24");

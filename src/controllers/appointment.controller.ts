@@ -17,7 +17,11 @@ class AppointmentController {
 
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '');
-
+            console.log('controller book appointment start', JSON.stringify({
+                name, email, mobile, gender, age, occupation, address, presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
+                familySevereDiseaseMember, familySevereDiseaseDetail, smoking, alcoholic,
+                drugAddict, doctorId
+            }));
             if (!token) {
                 // Auth token not found 
                 // just createuser and book appointment
