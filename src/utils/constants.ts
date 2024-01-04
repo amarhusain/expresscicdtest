@@ -26,3 +26,5 @@ export enum USER_ROLE {
 export const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 export const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
+
+// db.users.updateOne({ _id: ObjectId("65951e8a3bc20735d6489952") }, { $set: { role: "PATIENT" } })
