@@ -8,6 +8,7 @@ export class AppointmentRepository {
 
     async createAppointment(createAppointmentDto: CreateAppointmentDto) {
         const appointment = new this.appointmentModel(createAppointmentDto);
+        console.log('appointment saved', appointment);
         return await appointment.save();
     }
 
