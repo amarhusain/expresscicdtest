@@ -23,6 +23,8 @@ class AppointmentController {
                 drugAddict, doctorId
             }));
             if (!token) {
+                console.log('controller token not found')
+
                 // Auth token not found 
                 // just createuser and book appointment
                 let appointmentDt = new Date(appointmentDate);
@@ -38,10 +40,14 @@ class AppointmentController {
                     logger.info('API url "' + req.originalUrl + '" handled successfully!');
                 }
             } else {
+                console.log('controller token found')
+
                 //check user is loggedin and token is valid
                 const payload = await authService.verifyJwt(token, config.jwtKey);
 
                 if (payload) {
+                    console.log('controller payload found', payload.userId, payload.email)
+
                     // old user only book
                     const result = await appointmentService.bookAppointment(payload.userId);
                     if (result instanceof CustomError || result instanceof Error) {

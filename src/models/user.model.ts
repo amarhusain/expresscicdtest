@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { authService } from "../services/auth.service";
 
 export interface IUserDocument extends mongoose.Document {
     name: string;
@@ -20,24 +19,17 @@ const UserSchema: mongoose.Schema<IUserDocument> = new mongoose.Schema(
         password: { type: String, required: true },
         role: { type: String, required: true },
         resetNonce: { type: Boolean, required: true },
-    },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret._id;
-                delete ret.password;
-            }
-        }
     }
 );
 
-UserSchema.pre('save', async function (done) {
-    if (this.isModified('password') || this.isNew) {
-        const hashedPwd = authService.pwdToHash(this.get('password'));
-        this.set('password', hashedPwd);
-    }
-    done();
-})
+//TODO need to remove
+// UserSchema.pre('save', async function (done) {
+//     if (this.isModified('password') || this.isNew) {
+//         const hashedPwd = authService.pwdToHash(this.get('password'));
+//         this.set('password', hashedPwd);
+//     }
+//     done();
+// })
 
 const User = mongoose.model<IUserDocument>('User', UserSchema);
 
