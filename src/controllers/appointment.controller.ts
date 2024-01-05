@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { config } from "../common/config";
 import { CustomError } from "../common/errors/custom-error";
-import { NotAuthorizedError } from "../common/errors/not-authorized-error";
 import logger from "../common/logger";
 import { appointmentService } from "../services/appointment.service";
-import { authService } from "../services/auth.service";
 
 
 class AppointmentController {
@@ -16,58 +13,24 @@ class AppointmentController {
             drugAddict, doctorId } = req.body;
 
         try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
-            console.log('controller book appointment start', JSON.stringify({
-                name, email, mobile, gender, age, occupation, address, presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
+            // const token = req.header('Authorization')?.replace('Bearer ', '');
+            const appointmentDt = new Date(appointmentDate);
+            const data = {
+                name, email, mobile, gender, age, occupation, address, appointmentDt, presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
                 familySevereDiseaseMember, familySevereDiseaseDetail, smoking, alcoholic,
                 drugAddict, doctorId
-            }));
-            if (!token) {
-                console.log('controller token not found')
-
-                // Auth token not found 
-                // just createuser and book appointment
-                let appointmentDt = new Date(appointmentDate);
-                const result = await appointmentService.createUserAndBookAppointment({
-                    name, email, mobile, gender, age, occupation, address, appointmentDt, presentComplain, pastMedicalHistory, familySevereDisease, familySevereDiseaseSide,
-                    familySevereDiseaseMember, familySevereDiseaseDetail, smoking, alcoholic,
-                    drugAddict, doctorId
-                });
-                if (result instanceof CustomError || result instanceof Error) {
-                    next(result);
-                } else {
-                    res.status(200).send(result);
-                    logger.info('API url "' + req.originalUrl + '" handled successfully!');
-                }
+            };
+            const result = await appointmentService.createUserAndBookAppointment(data);
+            if (result instanceof CustomError || result instanceof Error) {
+                next(result);
             } else {
-                console.log('controller token found')
-
-                //check user is loggedin and token is valid
-                const payload = await authService.verifyJwt(token, config.jwtKey);
-
-                if (payload) {
-                    console.log('controller payload found', payload.userId, payload.email)
-
-                    // old user only book
-                    const result = await appointmentService.bookAppointment(payload.userId);
-                    if (result instanceof CustomError || result instanceof Error) {
-                        next(result);
-                    } else {
-                        res.status(200).send(result);
-                        logger.info('API url "' + req.originalUrl + '" handled successfully!');
-                    }
-                } else {
-                    logger.error('Auth token expire need to login');
-                    return new NotAuthorizedError('Auth token expire need to login again.');
-                }
-
+                res.status(200).send(result);
+                logger.info('API url "' + req.originalUrl + '" handled successfully!');
             }
+
         } catch (error: any) {
             next(error);
         }
-
-
-
     }
 
     // async addPatientDetail(req: Request, res: Response, next: NextFunction) {

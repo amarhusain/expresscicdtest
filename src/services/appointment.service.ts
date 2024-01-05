@@ -24,56 +24,43 @@ export class AppointmentService {
     }
 
     async createUserAndBookAppointment(bookAppointmentDto: BookAppointmentDto) {
-        console.log('book appointment start');
 
         const existingUser = await this.userRepository.findOneByEmail(bookAppointmentDto.email);
-        console.log('book appointment existing user', existingUser);
 
         if (existingUser) {
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: existingUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line24");
             const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: existingUser.email }], receipientName: existingUser.name }
-            console.log('mail dto created');
 
             try {
-                console.log('appointment email start');
-
                 const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
-                console.log('appointment email failed');
 
             } catch (err) {
                 logger.error('Email address seems incorrect!');
             }
-            logger.error('Email address seems incorrect!');
 
             return result;
         } else {
             // Create patient account
             const newUser = await this.createPatientAccount(bookAppointmentDto)
             if (!newUser) return new InternalServerError("Internal server error, appointmentService-line29");
-            console.log('new user created', newUser.name);
 
             // Save patient detail
             const patient = await this.savePatientDetail(newUser._id, bookAppointmentDto)
             if (!patient) return new InternalServerError("Internal server error, appointmentService-line32");
-            console.log('patient data saved', patient.gender);
 
             // Book appointment for User
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: newUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line35");
-            console.log('new user appointment saved', result.date);
 
             const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: newUser.email }], receipientName: newUser.name }
             try {
-                console.log('new user appointment mail start');
 
                 const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
-                console.log('new user appointment mail end');
 
             } catch (err) {
                 logger.error('Email address seems incorrect!')
             }
-            console.log('book appointment function end');
 
             return result;
         }
@@ -147,10 +134,15 @@ export class AppointmentService {
         let userDetail: IPatient | null = null;
         if (token) {
             //check user is loggedin and token is valid
-            payload = await this.authService.verifyJwt(token, config.jwtKey);
-            if (payload) {
-                userDetail = await this.patientRepository.findPatientByUserId(payload.userId);
+            try {
+                payload = await this.authService.verifyJwt(token, config.jwtKey);
+                if (payload) {
+                    userDetail = await this.patientRepository.findPatientByUserId(payload.userId);
+                }
+            } catch (error) {
+                console.log('payload ', JSON.stringify(error));
             }
+
         }
 
         const allSlot = [];

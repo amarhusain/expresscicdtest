@@ -16,7 +16,7 @@ const appDomain = PRODUCTION_DOMAIN || 'https://shivamhomeocare.com';
 
 // ------------ Uncomment for development -----------//
 // const mongoConnUri = MONGO_URI_DEVELOPMENT + "/" + DB_NAME_DEVELOPMENT;
-// const appDomain =  DEVELOPMENT_DOMAIN ;
+// const appDomain = DEVELOPMENT_DOMAIN;
 
 export const config: Config = {
     mongoConnUri,

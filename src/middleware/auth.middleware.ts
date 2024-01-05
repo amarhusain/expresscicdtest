@@ -31,38 +31,39 @@ class AuthMiddleware {
     }
 
     async validateUserAuthentication(req: Request, res: Response, next: NextFunction) {
-        try {
-            const token = req.header('Authorization')?.replace('Bearer ', '');
 
-            if (!token) {
-                logger.error('Auth token not found');
-                res.status(401).send({ error: 'Auth token not found' });
-            } else {
-                if (config.jwtKey) {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+
+        if (!token) {
+            logger.error('Auth token not found');
+            res.status(401).send({ error: 'Auth token not found' });
+        } else {
+            if (config.jwtKey) {
+                try {
                     const decoded = await authService.verifyJwt(token, config.jwtKey);
-                    // (req as CustomRequest).token = decoded;
                     req.body.payload = decoded;
                     next();
 
-                } else {
-                    logger.error('JWT key not found');
-                    res.status(401).send({ error: 'JWT key not found' });
-                }
+                } catch (error: any) {
+                    if (error.name === 'TokenExpiredError') {
+                        logger.error(`[${error.name}] : ${error.message}`);
+                        res.status(401).send({ error: `[${error.name}] : ${error.message}` });
+                    } else if (error.name === 'JsonWebTokenError') {
+                        logger.error(`[${error.name}] : ${error.message}`);
+                        res.status(401).send({ error: `[${error.name}] : ${error.message}` });
+                    } else {
+                        logger.error(`[${error.name}] : ${error.message}`);
+                        res.status(401).send({ error: `[${error.name}] : ${error.message}` });
+                    }
 
-            }
-        } catch (error: any) {
-            if (error.name === 'TokenExpiredError') {
-                logger.error(`[${error.name}] : ${error.message}`);
-                res.status(401).send({ error: `[${error.name}] : ${error.message}` });
-            } else if (error.name === 'JsonWebTokenError') {
-                logger.error(`[${error.name}] : ${error.message}`);
-                res.status(401).send({ error: `[${error.name}] : ${error.message}` });
+                }
             } else {
-                logger.error(`[${error.name}] : ${error.message}`);
-                res.status(401).send({ error: `[${error.name}] : ${error.message}` });
+                logger.error('JWT key not found');
+                res.status(401).send({ error: 'JWT key not found' });
             }
 
         }
+
     }
 
     async checkUserRoleIsDoctor(req: Request, res: Response, next: NextFunction) {

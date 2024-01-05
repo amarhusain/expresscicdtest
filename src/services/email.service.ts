@@ -123,17 +123,17 @@ export class EmailService {
                 plainText: "Appointment Confirmation",
                 html: `<html>
                     <p> <b>Dear ${mailDto.receipientName}</b>,</p>
-                    <p>We hope this email finds you well. We would like to confirm your upcoming appointment with <b> Shivam Homeocare & Reasearch Center,/b>.</p>
-                    <br><br>
+                    <p>We hope this email finds you well. We would like to confirm your upcoming appointment with <b> Shivam Homeocare & Reasearch Center</b>.</p>
+                    <br>
                     <p>Appointment Details:</p>
                     <p> - <b> Date: ${appointmentDate.getDate() + " " + months[appointmentDate.getMonth()] + " " + appointmentDate.getFullYear()}</b></p>
                     <p> - <b>Time: ${moment(appointmentDate).format('LT')}</b></p>
-                    <p> - <b>Location: ${CONTACT.ADDRESS}</b> </p>
-                    <br><br>
+                    <p> - <b>Location:</b> ${CONTACT.ADDRESS} </p>
+                    
                     <p>
                         If you have any specific requirements or need to reschedule, please let us know at least 24 hours in advance. We value your time and want to ensure that the appointment is convenient for you.
                     </p>
-                    <br>
+                    
                     <p>Should you have any questions or require further assistance, feel free to contact us at ${CONTACT.HOSPITAL_NUMBER}. </p>
 
                     <p>Thank you for choosing Shivam Homeocare & Research Center. We look forward to meeting with you.</p> 
@@ -143,10 +143,10 @@ export class EmailService {
                     <p>Thank you for visiting Shivam Homeocare.</p>
 
                     <p><b>Best regards</b>, </p>
-                    <br> 
-                    <p><b>Dr. Arvind Srivastav</b></p>
-                    <p><b>Shivam Homeocare Team</b></p>
-                    <p><b>Contact Number : ${CONTACT.PHONE_HOSPITAL_1}</b></p>
+
+                    <p>Dr. Arvind Srivastav</p>
+                    <p>Shivam Homeocare Team</p>
+                    <p>Contact Number : ${CONTACT.PHONE_HOSPITAL_1}</p>
                     <html>`
             },
         }

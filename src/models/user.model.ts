@@ -22,15 +22,6 @@ const UserSchema: mongoose.Schema<IUserDocument> = new mongoose.Schema(
     }
 );
 
-//TODO need to remove
-// UserSchema.pre('save', async function (done) {
-//     if (this.isModified('password') || this.isNew) {
-//         const hashedPwd = authService.pwdToHash(this.get('password'));
-//         this.set('password', hashedPwd);
-//     }
-//     done();
-// })
-
 const User = mongoose.model<IUserDocument>('User', UserSchema);
 
 export default User;

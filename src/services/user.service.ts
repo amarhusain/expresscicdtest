@@ -4,7 +4,6 @@ import { InternalServerError } from '../common/errors/internal-server-error';
 import { NotAuthorizedError } from "../common/errors/not-authorized-error";
 import { RecordNotFoundError } from "../common/errors/record-not-found-error";
 import { AuthUserDto, CreateUserDto } from "../dto/user.dto";
-import { ResetPwdTokenRepository, resetPwdTokenRepository } from '../repository/resetpwd.token.repository';
 import { UserRepository, userRepository } from "../repository/user.repository";
 import { AuthService, authService } from "./auth.service";
 import { EmailService, emailService } from './email.service';
@@ -14,7 +13,6 @@ export class UserService {
 
     constructor(private userRepository: UserRepository,
         private authService: AuthService,
-        private resetPwdTokenRepository: ResetPwdTokenRepository,
         private emailService: EmailService) {
 
     }
@@ -139,4 +137,4 @@ export class UserService {
 
 }
 
-export const userService = new UserService(userRepository, authService, resetPwdTokenRepository, emailService);
+export const userService = new UserService(userRepository, authService, emailService);
