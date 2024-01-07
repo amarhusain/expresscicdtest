@@ -30,11 +30,10 @@ export class AppointmentService {
         if (existingUser) {
             const result = await this.appointmentRepository.createAppointment({ date: bookAppointmentDto.appointmentDt, doctorId: bookAppointmentDto.doctorId, userId: existingUser._id });
             if (!result) return new InternalServerError("Internal server error, appointmentService-line24");
+
             const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: existingUser.email }], receipientName: existingUser.name }
-
             try {
-                const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
-
+                await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
             } catch (err) {
                 logger.error('Email address seems incorrect!');
             }
@@ -55,11 +54,9 @@ export class AppointmentService {
 
             const mailDto: MailDto = { senderAddress: "services@shivamhomeocare.com", senderName: '', recipientsAddress: [{ address: newUser.email }], receipientName: newUser.name }
             try {
-
-                const email = await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
-
+                await this.emailService.sendAppointmentConfirmationEmail(mailDto, bookAppointmentDto.appointmentDt);
             } catch (err) {
-                logger.error('Email address seems incorrect!')
+                logger.error('Email address seems incorrect!');
             }
 
             return result;
